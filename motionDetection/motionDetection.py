@@ -50,7 +50,7 @@ while(1):
     fgmask = fgbg.apply(blur)
     ##thresholds the mask
     thresh = cv2.threshold(fgmask, 25, 255, cv2.THRESH_BINARY)[1]
-
+    ##Add frame to deque
     preRecording.append(frame)
 
     if (isMoving(thresh,sensibility)):
