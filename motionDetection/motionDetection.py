@@ -1,7 +1,20 @@
 import numpy as np
 import cv2
-from time import gmtime, strftime
+from time import localtime, strftime
 from collections import deque
+# loggex.py
+import logging
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+fh = logging.FileHandler('events.log')
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+fh.setFormatter(formatter)
+logger.addHandler(fh)
 
 
 def isMoving(frame, sensibility):
@@ -23,6 +36,7 @@ def isMoving(frame, sensibility):
         return True
     return False
 
+logger.info("Motion Detection started" )
 
 ##VideoCapture object
 cap = cv2.VideoCapture(0)
@@ -35,7 +49,7 @@ out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
 ##Font object
 font = cv2.FONT_HERSHEY_PLAIN
 ##Create deque
-preRecording = deque(maxlen=40)
+preRecording = deque(maxlen=20)
 ##Variables
 record = False
 sensibility = 1000
@@ -55,14 +69,16 @@ while(1):
 
     if (isMoving(thresh,sensibility)):
         record = True
-        counter = 60
+        counter = 50
 
     if(record or counter > 0):
         ##Writes the date and time in the frame
         ##putText(frame,text,location,font,size,color,thickness,aliasing)
-        cv2.putText(preRecording.pop(), strftime("%Y-%m-%d %H:%M:%S", gmtime()), (10,20), font, 1.4, (0,0,0), 1, cv2.LINE_AA)
+        aux = preRecording.popleft()
+        cv2.putText(aux, strftime("%Y-%m-%d %H:%M:%S", localtime()), (10,20), font, 1.4, (0,0,0), 1, cv2.LINE_AA)
+        cv2.putText(frame, "*", (300,20), font, 1.4, (0,0,0), 1, cv2.LINE_AA)
         ##Writes frame into video
-        out.write(frame)
+        out.write(aux)
         counter -=1
 
     if(counter == 0):
@@ -79,6 +95,7 @@ while(1):
     if k == 27:
         break
 
+logger.info("Shutdown motion detection" )
 cap.release()
 cv2.destroyAllWindows()
 out.release()
