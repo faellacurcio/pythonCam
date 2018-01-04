@@ -1,2 +1,4 @@
-events.log
-./videos/
+# Logs and databases #
+######################
+*.log
+videos/
