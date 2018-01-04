@@ -88,10 +88,10 @@ while(1):
         out.write(aux)
         counter -= 1
 
+    # Once it reaches the last frame prepares a new videoWriter with a new timestamp
     if(counter == 1):
         out = cv2.VideoWriter(videoFolder + getTime() + videoExt, fourcc, 15.0, (int(w), int(h)))
-
-    if(counter == 0):
+        counter -= 1
         record = False
 
     # #Show images
