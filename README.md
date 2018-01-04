@@ -12,5 +12,5 @@ $ python3 motionDetection.py
 ```
 TODO:
 - [x] Upload code to Github
-- [ ] Change the location of the output video
-- [ ] Change the name of the output video as the date of the movement.
+- [x] Change the location of the output video
+- [x] Change the name of the output video as the date of the movement.
