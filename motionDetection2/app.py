@@ -1,9 +1,41 @@
+# -*- coding: utf-8 -*-
+
 # import the necessary packages
 import argparse
 import datetime
 import imutils
 import time
 import cv2
+
+import telepot
+
+
+def handle(msg):
+
+    # print(msg)
+    try:
+        userName = msg['from']['first_name']
+    except:
+        try:
+            userName = msg['from']['first_name'] + " LastNameUnkown"
+        except:
+            userName = "FirstNameUnknown LastNameUnkown"
+
+    content_type, chat_type, chat_id = telepot.glance(msg)
+
+    if (content_type == 'text'):
+        command = msg['text']
+        print('Got command from ' + userName + ': %s' % command)
+
+        bot.sendMessage(chat_id, "Hello " + str(chat_id) + ", Osob up and running!")
+
+
+ALERT_DELAY = 9999999999999
+TOKEN = input("Bot Token: ")
+print("Initializing")
+bot = telepot.Bot(TOKEN)
+print(bot.getMe())
+bot.message_loop(handle)
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -24,6 +56,9 @@ firstFrame = None
 
 # initialize the first frame in the video stream
 counter = 0
+
+# Variable to avoid flodding the chat.
+lastSeen = 0
 
 # loop over the frames of the video
 while True:
@@ -69,6 +104,11 @@ while True:
         (x, y, w, h) = cv2.boundingRect(c)
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         text = "Occupied"
+        if(lastSeen > ALERT_DELAY):
+            bot.sendMessage("<CHAT_ID>", "Something is moving!!!")
+            lastSeen = 0
+            pass
+
     # draw the text and timestamp on the frame
     cv2.putText(
         frame, 
@@ -96,8 +136,9 @@ while True:
     key = cv2.waitKey(1) & 0xFF
 
     counter += 1
+    lastSeen += 1
 
-    if (counter > 10):
+    if (counter > 15):
         firstFrame = None
         counter = 0
 
