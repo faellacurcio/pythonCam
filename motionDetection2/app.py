@@ -9,6 +9,8 @@ import cv2
 
 import telepot
 
+import json
+
 
 def handle(msg):
 
@@ -29,9 +31,13 @@ def handle(msg):
 
         bot.sendMessage(chat_id, "Hello " + str(chat_id) + ", Osob up and running!")
 
+file = open('secret_data.json')
+json_data = json.load(file)
 
-ALERT_DELAY = 9999999999999
-TOKEN = input("Bot Token: ")
+TOKEN = json_data["TOKEN"]
+
+ALERT_DELAY = json_data["IDLE_FRAMES"]
+
 print("Initializing")
 bot = telepot.Bot(TOKEN)
 print(bot.getMe())
@@ -105,7 +111,7 @@ while True:
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         text = "Occupied"
         if(lastSeen > ALERT_DELAY):
-            bot.sendMessage("<CHAT_ID>", "Something is moving!!!")
+            bot.sendMessage(json_data["CHAT_ID"], "Something is moving!!!")
             lastSeen = 0
             pass
 
