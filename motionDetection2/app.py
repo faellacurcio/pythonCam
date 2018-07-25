@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # import the necessary packages
+import _thread
 import argparse
 import datetime
 import imutils
@@ -24,6 +25,7 @@ def handle(msg):
             userName = "FirstNameUnknown LastNameUnkown"
 
     content_type, chat_type, chat_id = telepot.glance(msg)
+    print("content_type", content_type, "chat_type", chat_type, "chat_id", chat_id)
 
     if (content_type == 'text'):
         command = msg['text']
@@ -71,6 +73,7 @@ while True:
     # grab the current frame and initialize the occupied/unoccupied
     # text
     (grabbed, frame) = camera.read()
+    frame_orig = frame
     text = "Unoccupied"
 
     # if the frame could not be grabbed, then we have reached the end
@@ -111,7 +114,10 @@ while True:
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
         text = "Occupied"
         if(lastSeen > ALERT_DELAY):
-            bot.sendMessage(json_data["CHAT_ID"], "Something is moving!!!")
+            cv2.imwrite("./last_frame.jpg", frame_orig)
+            _thread.start_new_thread( bot.sendMessage, (json_data["CHAT_ID"], "Something is moving!!!") )
+            _thread.start_new_thread( bot.sendPhoto, (json_data["CHAT_ID"], open("./last_frame.jpg",'rb'), "Here's a photo of it") )
+            
             lastSeen = 0
             pass
 
@@ -125,7 +131,6 @@ while True:
         (0, 0, 255), 
         2
     )
-
     cv2.putText(
         frame, 
         datetime.datetime.now().strftime("%A %d %B %Y %I:%M:%S%p"),
@@ -137,13 +142,14 @@ while True:
 
     # show the frame and record if the user presses a key
     cv2.imshow("Security Feed", frame)
-    cv2.imshow("Thresh", thresh)
-    cv2.imshow("Frame Delta", frameDelta)
+    # cv2.imshow("Thresh", thresh)
+    # cv2.imshow("Frame Delta", frameDelta)
     key = cv2.waitKey(1) & 0xFF
 
     counter += 1
     lastSeen += 1
 
+    #Clear previous detections every 15 frames
     if (counter > 15):
         firstFrame = None
         counter = 0
