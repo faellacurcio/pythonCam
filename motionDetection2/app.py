@@ -15,9 +15,9 @@ import json
 
 def handle(msg):
 
-    # print(msg)
+    print(msg)
     try:
-        userName = msg['from']['first_name']
+        userName = msg['from']['first_name'] + " " + msg['from']['last_name']
     except:
         try:
             userName = msg['from']['first_name'] + " LastNameUnkown"
@@ -31,9 +31,9 @@ def handle(msg):
         command = msg['text']
         print('Got command from ' + userName + ': %s' % command)
 
-        bot.sendMessage(chat_id, "Hello " + str(chat_id) + ", Osob up and running!")
+        bot.sendMessage(chat_id, "Hello " + userName + ", Osob up and running!")
 
-file = open('secret_data.json')
+file = open('./secret_data.json')
 json_data = json.load(file)
 
 TOKEN = json_data["TOKEN"]
@@ -50,6 +50,7 @@ ap = argparse.ArgumentParser()
 ap.add_argument("-v", "--video", help="path to the video file")
 ap.add_argument("-a", "--min-area", type=int, default=500, help="minimum area size")
 args = vars(ap.parse_args())
+
 # if the video argument is None, then we are reading from webcam
 if args.get("video", None) is None:
     camera = cv2.VideoCapture(0)
@@ -99,8 +100,8 @@ while True:
     # on thresholded image
     thresh = cv2.dilate(thresh, None, iterations=2)
 
-    # (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     # loop over the contours
     for c in cnts:
@@ -117,7 +118,7 @@ while True:
             cv2.imwrite("./last_frame.jpg", frame_orig)
             _thread.start_new_thread( bot.sendMessage, (json_data["CHAT_ID"], "Something is moving!!!") )
             _thread.start_new_thread( bot.sendPhoto, (json_data["CHAT_ID"], open("./last_frame.jpg",'rb'), "Here's a photo of it") )
-            
+
             lastSeen = 0
             pass
 
